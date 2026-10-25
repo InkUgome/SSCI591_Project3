@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Red Tide Watch | Florida Coastal Monitoring</title>
+
+  <!-- ArcGIS Maps SDK theme -->
+  <link
+    rel="stylesheet"
+    href="https://js.arcgis.com/5.1/esri/themes/dark/main.css"
+  >
+
+  <!-- Our CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="calcite-mode-dark">
+
+  <header>
+    <h1>Red Tide Watch</h1>
+    <p>Explore Red Tide Sampling Along Florida’s Coast</p>
+  </header>
+
+  <section class="about" aria-labelledby="about-title">
+    <h2 id="about-title">About This Map</h2>
+
+    <p>
+      This map displays sampling locations from the most recent eight
+      days of Florida’s red tide monitoring program.
+      The data show the abundance of Karenia brevis, the microscopic
+      alga responsible for Florida red tide.
+      Data are provided by the
+      <a
+        href="https://gis.myfwc.com/mapping/rest/services/Projects_FWC/HAB_forDEP_Dashboard/MapServer"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Florida Fish and Wildlife Conservation Commission (FWC)</a>.
+      Click a sampling location to explore its collection date,
+      abundance category, and sampling depth.
+      Adapted from Esri’s
+      <a href="https://developers.arcgis.com/javascript/latest/sample-code/intro-mapview/"
+         target="_blank" rel="noopener noreferrer">Intro to MapView</a>
+      sample, this app changes the map extent, basemap, symbols, and title,
+      and adds sampling data, components, filters, and charts.
+    </p>
+  </section>
+
+<main>
+  <!-- Summary cards -->
+  <section class="stats-grid" aria-label="Sampling summary">
+    <article class="stat-card">
+      <span class="stat-label">Sampling records</span>
+      <strong id="total-count">—</strong>
+      <span class="stat-note">For the selected date range</span>
+    </article>
+
+    <button type="button" id="elevated-card" class="stat-card interactive-card" disabled aria-pressed="false">
+      <span class="stat-label">Medium + high abundance</span>
+      <strong id="elevated-count">—</strong>
+      <span class="stat-note">Above 100,000 cells/L · click to filter and locate</span>
+    </button>
+
+    <article class="stat-card">
+      <span class="stat-label">Latest sampling date</span>
+      <strong id="latest-date" class="date-value">—</strong>
+      <span class="stat-note">Within the selected records</span>
+    </article>
+  </section>
+
+  <!-- Date filter -->
+  <section class="filter-bar" aria-label="Filter sampling records">
+    <div class="filter-control">
+      <label for="date-filter">Sampling date</label>
+      <select id="date-filter" disabled>
+        <option value="all">All available dates</option>
+      </select>
+    </div>
+
+    <div class="filter-control">
+    <label for="abundance-filter">Abundance</label>
+    <select id="abundance-filter" disabled>
+      <option value="all">All categories</option>
+      <option value="elevated">Medium + high</option>
+      <option value="0">Background</option>
+      <option value="1">Very low</option>
+      <option value="2">Low</option>
+      <option value="3">Medium</option>
+      <option value="4">High</option>
+      <option value="5">Other / unknown</option>
+    </select>
+  </div>
+  <button id="reset-filter" type="button" disabled>
+      Reset
+    </button>
+
+    <p id="data-status" role="status" aria-live="polite">
+      Loading FWC sampling data…
+    </p>
+  </section>
+
+  <div class="explorer-grid">
+    <div id="viewDiv" role="region" aria-label="Florida red tide sampling map"></div>
+    <aside class="records-panel" aria-labelledby="records-title">
+      <h2 id="records-title">Sampling Records</h2>
+      <p id="list-summary" aria-live="polite">Loading records…</p>
+      <div class="list-tools">
+        <label class="visually-hidden" for="record-search">Search locations or sample IDs in this list</label>
+        <input id="record-search" type="search" placeholder="Search location or sample ID…" autocomplete="off">
+        <label class="visually-hidden" for="record-sort">Sort sampling records</label>
+        <select id="record-sort">
+          <option value="abundance">Highest abundance first</option>
+          <option value="date">Newest samples first</option>
+          <option value="name">Location A–Z</option>
+        </select>
+      </div>
+      <p class="list-hint">Search applies to this list. Select a row to view it on the map.</p>
+      <div id="records-list" class="records-list"></div>
+    </aside>
+  </div>
+
+  <!-- Daily chart -->
+  <section class="chart-panel" aria-labelledby="chart-title">
+    <div class="chart-heading">
+      <div>
+        <h2 id="chart-title">Daily Sampling Results</h2>
+        <p>Daily counts for the selected abundance categories</p>
+      </div>
+      <span class="chart-unit">NUMBER OF RECORDS</span>
+    </div>
+
+    <div id="chart-legend" class="chart-legend"></div>
+
+    <p id="chart-selection" class="chart-selection">
+      All available dates
+    </p>
+
+    <div class="chart-scroll">
+      <div
+        id="daily-chart"
+        class="daily-chart"
+        role="group"
+        aria-label="Daily stacked bars. Select a date to filter the map."
+      ></div>
+    </div>
+
+    <p class="chart-note">
+      Select a bar to filter the map. Dates without records are marked
+      “No samples.” Sampling locations and effort vary by day, so these
+      counts do not measure changes in average coastal concentration.
+    </p>
+
+    <details class="data-details">
+      <summary>View chart data as a table</summary>
+      <div class="table-scroll">
+        <table id="chart-table">
+          <caption>Daily sampling counts by abundance category</caption>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+</main>
+
+  <footer>
+    <p>
+      Sampling results describe conditions at specific locations and
+      times, rather than overall ocean pollution or current swimming safety.
+    </p>
+
+    <p class="project-credit">
+      Created by Xingtong Yao · SSCI 591 · Project 3 · Fall 2026
+    </p>
+
+    <p class="project-credit">
+      Data: FWC-FWRI · Built with ArcGIS Maps SDK for JavaScript
+    </p>
+  </footer>
+
+  <!-- Our JavaScript -->
+  <script type="module" src="https://js.arcgis.com/5.1/"></script>
+  <script type="module" src="https://js.arcgis.com/5.1/map-components/"></script>
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>
